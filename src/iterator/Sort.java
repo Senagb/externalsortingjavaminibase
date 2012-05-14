@@ -3,11 +3,22 @@ package iterator;
 import global.AttrType;
 import global.GlobalConst;
 import global.PageId;
+import global.RID;
+import global.SystemDefs;
 import global.TupleOrder;
+import heap.FieldNumberOutOfBoundException;
+import heap.HFPage;
 import heap.Heapfile;
+import heap.InvalidSlotNumberException;
+import heap.InvalidTupleSizeException;
+import heap.InvalidTypeException;
 import heap.Tuple;
 
 import java.io.IOException;
+
+import btree.BT;
+
+import diskmgr.Page;
 
 /**
  * The Sort class sorts a file. All necessary information are passed as
@@ -16,6 +27,9 @@ import java.io.IOException;
  * the sorting is done, the user should call <code>close()</code> to clean up.
  */
 public class Sort extends Iterator implements GlobalConst {
+	
+	private int keyType;
+	//------------------------------------------------------------------------
 	private static final int ARBIT_RUNS = 10;
 
 	private AttrType[] _in;
@@ -32,6 +46,7 @@ public class Sort extends Iterator implements GlobalConst {
 	private int sortFldLen;
 	private int tuple_size;
 
+	
 	// private pnodeSplayPQ Q;
 	private Heapfile[] temp_files;
 	private int n_tempfiles;
@@ -68,16 +83,128 @@ public class Sort extends Iterator implements GlobalConst {
 	 *                from lower layers
 	 * @exception SortException
 	 *                something went wrong in the lower layer.
+	 * @throws InvalidTupleSizeException 
+	 * @throws InvalidTypeException 
+	 * @throws IteratorBMException 
 	 */
 	public Sort(AttrType[] in, short len_in, short[] str_sizes, Iterator am,
 			int sort_fld, TupleOrder sort_order, int sort_fld_len, int n_pages)
-			throws IOException, SortException {
-		_n_pages = n_pages;
-		_sort_fld = sort_fld;
-		_am = am;
-
+			throws IOException, SortException, InvalidTypeException, InvalidTupleSizeException, IteratorBMException {
+		_am=am;
+		_sort_fld=sort_fld;
+		order=sort_order;
+		_n_pages=n_pages;
+		_in = in;
+		n_cols=len_in;
+		str_lens= str_sizes;
+		sortFldLen=sort_fld_len;
+		bufs_pids = new PageId[_n_pages];
+		bufs= new byte[_n_pages][];
+		
+		get_buffer_pages(n_pages, bufs_pids, bufs);
+		
+		Tuple tuple = new Tuple();
+		tuple.setHdr(n_cols, in, str_sizes);
+		tuple_size=tuple.size();
 	}
-
+	
+	public HFPage sortPage(HFPage p) throws Exception
+	{
+		Tuple [] tupleArray = new Tuple [p.getSlotCnt()];
+		RID dummyrid = p.firstRecord();
+		for(int i=0;i<p.getSlotCnt();i++){
+			tupleArray[i]=p.getRecord(dummyrid);
+			p.deleteRecord(dummyrid);
+			dummyrid=p.nextRecord(dummyrid);
+		}
+		tupleArray=mergeSortPage(tupleArray);
+		for(int i=0;i<tupleArray.length;i++)
+		{
+			p.insertRecord(tupleArray[i].getTupleByteArray());
+		}
+		return p;
+	}
+	
+	private Tuple[] mergeSortPage(Tuple [] tupleArray)throws Exception
+	{
+		if(tupleArray.length==1)
+			return tupleArray;
+		Tuple [] firstMid= new Tuple[tupleArray.length/2];
+		Tuple [] secondMid=null;
+		if((tupleArray.length&1)==1)
+			secondMid= new Tuple[tupleArray.length/2+1];
+		else
+			secondMid= new Tuple[tupleArray.length/2];
+		System.arraycopy(tupleArray, 0, firstMid, 0, firstMid.length);
+		System.arraycopy(tupleArray, tupleArray.length/2, secondMid, 0, secondMid.length);
+		
+		Tuple [] firstSortedMid=mergeSortPage(firstMid);
+		Tuple [] secondSortedMid=mergeSortPage(secondMid);
+		Tuple [] mergeSorted=new Tuple[firstSortedMid.length+secondSortedMid.length];
+		int first=0;
+		int second=0;
+		int merge=0;
+		if(keyType==global.AttrType.attrInteger)
+		{
+			while(first<firstSortedMid.length&&second<secondSortedMid.length)
+			{
+				if(firstSortedMid[first].getIntFld(1)<secondSortedMid[second].getIntFld(1))
+				{
+					mergeSorted[merge]=firstSortedMid[first];
+					first++;
+					merge++;
+				}else{
+					mergeSorted[merge]=secondSortedMid[second];
+					second++;
+					merge++;
+				}
+			}
+			while(first<firstSortedMid.length)
+			{
+				mergeSorted[merge]=firstSortedMid[first];
+				first++;
+				merge++;
+			}
+			while(second<secondSortedMid.length)
+			{
+				mergeSorted[merge]=secondSortedMid[second];
+				second++;
+				merge++;
+			
+			}
+			return mergeSorted;
+		}
+		else
+		{
+			while(first<firstSortedMid.length&&second<secondSortedMid.length)
+			{
+				if((firstSortedMid[first].getStrFld(1).compareTo(secondSortedMid[second].getStrFld(1)))<1)
+				{
+					mergeSorted[merge]=firstSortedMid[first];
+					first++;
+					merge++;
+				}else{
+					mergeSorted[merge]=secondSortedMid[second];
+					second++;
+					merge++;
+				}
+			}
+			while(first<firstSortedMid.length)
+			{
+				mergeSorted[merge]=firstSortedMid[first];
+				first++;
+				merge++;
+			}
+			while(second<secondSortedMid.length)
+			{
+				mergeSorted[merge]=secondSortedMid[second];
+				second++;
+				merge++;
+			
+			}
+			return mergeSorted;
+		}
+	}
 	/**
 	 * Returns the next tuple in sorted order. Note: You need to copy out the
 	 * content of the tuple, otherwise it will be overwritten by the next
@@ -113,5 +240,6 @@ public class Sort extends Iterator implements GlobalConst {
 	 */
 	public void close() throws SortException, IOException {
 	}
-
+public static void main(String[] args) throws FieldNumberOutOfBoundException, IOException {
+	}
 }
