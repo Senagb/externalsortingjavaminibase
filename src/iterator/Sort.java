@@ -14,6 +14,7 @@ import heap.Scan;
 import heap.Tuple;
 
 import java.io.IOException;
+import java.util.Vector;
 
 /**
  * The Sort class sorts a file. All necessary information are passed as
@@ -87,7 +88,7 @@ public class Sort extends Iterator implements GlobalConst {
 			InvalidTupleSizeException, IteratorBMException {
 		_am = am;
 		_sort_fld = sort_fld;
-		order = sort_order;
+		// order = sort_order;
 		_n_pages = n_pages;
 		_in = in;
 		n_cols = len_in;
@@ -104,25 +105,30 @@ public class Sort extends Iterator implements GlobalConst {
 	}
 
 	// pass 0
-	public Heapfile sortHeapfile() throws Exception {
+	public Vector<Heapfile> sortHeapfile() throws Exception {
+		Vector<Heapfile> v = new Vector<Heapfile>();
 		Heapfile hf = new Heapfile("Sorted");
 		Scan s = gFile.openScan();
 		Tuple t = s.getNext(new RID());
 		HFPage page = new HFPage();
+		int counter = 0;
 		while (t != null) {
 			RID r = page.insertRecord(t.getTupleByteArray());
 			if (r == null) {
 				page = sortPage(page);
 				byte[] temp = page.getHFpageArray();
 				hf.insertRecord(temp);
+				v.add(hf);
+				hf = new Heapfile("Sorted" + counter);
+				counter ++;
+				s = hf.openScan();
 				page = new HFPage();
 				page.insertRecord(t.getTupleByteArray());
 
 			}
 			t = s.getNext(new RID());
 		}
-		return hf;
-
+		return v;
 	}
 
 	private HFPage sortPage(HFPage p) throws Exception {
