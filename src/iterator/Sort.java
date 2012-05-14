@@ -6,11 +6,16 @@ import global.PageId;
 import global.RID;
 import global.TupleOrder;
 import heap.FieldNumberOutOfBoundException;
+import heap.HFBufMgrException;
+import heap.HFDiskMgrException;
+import heap.HFException;
 import heap.HFPage;
 import heap.Heapfile;
+import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidTypeException;
 import heap.Scan;
+import heap.SpaceNotAvailableException;
 import heap.Tuple;
 
 import java.io.IOException;
@@ -88,7 +93,7 @@ public class Sort extends Iterator implements GlobalConst {
 			int sort_fld, TupleOrder sort_order, int sort_fld_len, int n_pages)
 			throws IOException, SortException, InvalidTypeException,
 			InvalidTupleSizeException, IteratorBMException {
-		keyType=in[0].attrType;
+		keyType = in[0].attrType;
 		_am = am;
 		_sort_fld = sort_fld;
 		order = sort_order;
@@ -269,6 +274,144 @@ public class Sort extends Iterator implements GlobalConst {
 				}
 				return mergeSorted;
 			}
+		}
+	}
+
+	public Vector<Heapfile> sort_Runs(Vector<Heapfile> files)
+			throws InvalidTupleSizeException, FieldNumberOutOfBoundException,
+			HFException, HFBufMgrException, HFDiskMgrException,
+			InvalidSlotNumberException, SpaceNotAvailableException, IOException {
+		
+		Vector<Heapfile> temp = files;
+		while (files.size() != 1) {
+			temp = run(temp);
+		}
+
+		return temp;
+	}
+
+	private Vector<Heapfile> run(Vector<Heapfile> files)
+			throws InvalidTupleSizeException, IOException,
+			FieldNumberOutOfBoundException, HFException, HFBufMgrException,
+			HFDiskMgrException, InvalidSlotNumberException,
+			SpaceNotAvailableException {
+		
+		int size = 0;
+		int counter = 0;
+		Vector<Heapfile> h_Files = files;
+		Vector<Heapfile> new_Files = new Vector<Heapfile>();
+		while (size < h_Files.size()) {
+			Heapfile file = new Heapfile("Sorted1" + counter);
+			Vector<Scan> h_Scanners = set_Scanners(h_Files, size);
+			size += h_Scanners.size();
+			Vector<Tuple> tuples = set_Tuples(h_Scanners);
+			int least = max_min(tuples,
+					order.tupleOrder == TupleOrder.Ascending,
+					keyType == global.AttrType.attrInteger);
+			while (least != -1) {
+				file.insertRecord(tuples.get(least).getTupleByteArray()); // anhe
+																			// byte
+																			// arraye
+																			// ele
+																			// haktebha
+																			// gowa
+																			// el
+																			// heapfile
+				tuples.set(least, h_Scanners.get(least).getNext(new RID()));
+				least = max_min(tuples,
+						order.tupleOrder == TupleOrder.Ascending,
+						keyType == global.AttrType.attrInteger);
+			}
+
+			new_Files.add(file);
+			counter++;
+		}
+		return new_Files;
+
+	}
+
+	private Vector<Scan> set_Scanners(Vector<Heapfile> h_Files, int start)
+			throws InvalidTupleSizeException, IOException {
+		
+		Vector<Scan> h_Scanners = new Vector<Scan>();
+		for (int i = 0; i < start + 49; i++) {
+			h_Scanners.add(h_Files.get(i).openScan());
+			if (i == h_Files.size() - 1)
+				return h_Scanners;
+		}
+		return h_Scanners;
+	}
+
+	private Vector<Tuple> set_Tuples(Vector<Scan> h_Scanners)
+			throws InvalidTupleSizeException, IOException {
+		
+		Vector<Tuple> tuples = new Vector<Tuple>();
+		for (int i = 0; i < h_Scanners.size(); i++) {
+			tuples.add(h_Scanners.get(i).getNext(new RID()));
+		}
+		return tuples;
+	}
+
+	private int max_min(Vector<Tuple> tuples, boolean isAscending,
+			boolean isInteger) throws FieldNumberOutOfBoundException,
+			IOException {
+		
+		int target = 0;
+		boolean empty = true;
+		if (isAscending) {
+			if (isInteger) {
+				for (int i = 0; i < tuples.size(); i++) {
+					if (tuples.get(i) != null
+							&& tuples.get(i).getIntFld(1) < tuples.get(target)
+									.getIntFld(1)) {
+						target = i;
+						empty = false;
+					} else if (tuples.get(i) != null) {
+						empty = false;
+					}
+				}
+			} else {
+				for (int i = 0; i < tuples.size(); i++) {
+					if (tuples.get(i) != null
+							&& tuples.get(i).getStrFld(1)
+									.compareTo(tuples.get(target).getStrFld(1)) < 0) {
+						target = i;
+						empty = false;
+					} else if (tuples.get(i) != null) {
+						empty = false;
+					}
+				}
+			}
+
+		} else {
+			if (isInteger) {
+				for (int i = 0; i < tuples.size(); i++) {
+					if (tuples.get(i) != null
+							&& tuples.get(i).getIntFld(1) > tuples.get(target)
+									.getIntFld(1)) {
+						target = i;
+						empty = false;
+					} else if (tuples.get(i) != null) {
+						empty = false;
+					}
+				}
+			} else {
+				for (int i = 0; i < tuples.size(); i++) {
+					if (tuples.get(i) != null
+							&& tuples.get(i).getStrFld(1)
+									.compareTo(tuples.get(target).getStrFld(1)) > 0) {
+						target = i;
+						empty = false;
+					} else if (tuples.get(i) != null) {
+						empty = false;
+					}
+				}
+			}
+		}
+		if (!empty) {
+			return target;
+		} else {
+			return -1;
 		}
 	}
 
