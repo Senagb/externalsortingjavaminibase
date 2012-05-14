@@ -4,25 +4,16 @@ import global.AttrType;
 import global.GlobalConst;
 import global.PageId;
 import global.RID;
-import global.SystemDefs;
 import global.TupleOrder;
 import heap.FieldNumberOutOfBoundException;
-import heap.HFBufMgrException;
-import heap.HFDiskMgrException;
-import heap.HFException;
 import heap.HFPage;
 import heap.Heapfile;
-import heap.InvalidSlotNumberException;
 import heap.InvalidTupleSizeException;
 import heap.InvalidTypeException;
 import heap.Scan;
 import heap.Tuple;
 
 import java.io.IOException;
-
-import btree.BT;
-
-import diskmgr.Page;
 
 /**
  * The Sort class sorts a file. All necessary information are passed as
@@ -36,30 +27,30 @@ public class Sort extends Iterator implements GlobalConst {
 	// ------------------------------------------------------------------------
 	private static final int ARBIT_RUNS = 10;
 
-	private AttrType[] _in;
-	private short n_cols;
-	private short[] str_lens;
-	private Iterator _am;
-	private int _sort_fld;
-	private TupleOrder order;
+	private AttrType[] _in;// size will always be 1
+	private short n_cols; // equal 1
+	private short[] str_lens;// size is one and assigned from the constructor
+	private Iterator _am;// given at the constructor
+	private int _sort_fld;// unsued in our case
+	// private TupleOrder order;
 	private int _n_pages;
-	private byte[][] bufs;
-	private boolean first_time;
+	private byte[][] bufs;// array of the bytes that is read and to be sorted
+	private boolean first_time;// first time to call pass 0
 	private int Nruns;
 	private int max_elems_in_heap;
-	private int sortFldLen;
+	private int sortFldLen; // length of the field you are sorting on
 	private int tuple_size;
 	protected Heapfile gFile; // user given file
 	// private pnodeSplayPQ Q;
-	private Heapfile[] temp_files;
+	private Heapfile[] temp_files; // replaced by one heapfile
 	private int n_tempfiles;
 	private Tuple output_tuple;
 	private int[] n_tuples;
-	private int n_runs;
-	private Tuple op_buf;
+	private int n_runs;// number of runs
+	// private Tuple op_buf;
 	// private OBuf o_buf;
 	// private SpoofIbuf[] i_buf;
-	private PageId[] bufs_pids;
+	private PageId[] bufs_pids; // ids of pages in the buffer manager
 	private boolean useBM = true; // flag for whether to use buffer manager
 
 	/**
