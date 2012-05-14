@@ -25,6 +25,9 @@ import java.util.Vector;
 public class Sort extends Iterator implements GlobalConst {
 
 	private int keyType;
+	protected Heapfile gFile; // user given file
+	protected boolean Ascending = true;
+
 	// ------------------------------------------------------------------------
 	private static final int ARBIT_RUNS = 10;
 
@@ -33,7 +36,7 @@ public class Sort extends Iterator implements GlobalConst {
 	private short[] str_lens;// size is one and assigned from the constructor
 	private Iterator _am;// given at the constructor
 	private int _sort_fld;// unsued in our case
-	// private TupleOrder order;
+	private TupleOrder order;
 	private int _n_pages;
 	private byte[][] bufs;// array of the bytes that is read and to be sorted
 	private boolean first_time;// first time to call pass 0
@@ -41,7 +44,6 @@ public class Sort extends Iterator implements GlobalConst {
 	private int max_elems_in_heap;
 	private int sortFldLen; // length of the field you are sorting on
 	private int tuple_size;
-	protected Heapfile gFile; // user given file
 	// private pnodeSplayPQ Q;
 	private Heapfile[] temp_files; // replaced by one heapfile
 	private int n_tempfiles;
@@ -86,22 +88,15 @@ public class Sort extends Iterator implements GlobalConst {
 			int sort_fld, TupleOrder sort_order, int sort_fld_len, int n_pages)
 			throws IOException, SortException, InvalidTypeException,
 			InvalidTupleSizeException, IteratorBMException {
+		keyType=in[0].attrType;
 		_am = am;
 		_sort_fld = sort_fld;
-		// order = sort_order;
+		order = sort_order;
 		_n_pages = n_pages;
 		_in = in;
 		n_cols = len_in;
 		str_lens = str_sizes;
 		sortFldLen = sort_fld_len;
-		bufs_pids = new PageId[_n_pages];
-		bufs = new byte[_n_pages][];
-
-		get_buffer_pages(n_pages, bufs_pids, bufs);
-
-		Tuple tuple = new Tuple();
-		tuple.setHdr(n_cols, in, str_sizes);
-		tuple_size = tuple.size();
 	}
 
 	// pass 0
@@ -120,7 +115,7 @@ public class Sort extends Iterator implements GlobalConst {
 				hf.insertRecord(temp);
 				v.add(hf);
 				hf = new Heapfile("Sorted" + counter);
-				counter ++;
+				counter++;
 				s = hf.openScan();
 				page = new HFPage();
 				page.insertRecord(t.getTupleByteArray());
@@ -166,58 +161,114 @@ public class Sort extends Iterator implements GlobalConst {
 		int first = 0;
 		int second = 0;
 		int merge = 0;
-		if (keyType == global.AttrType.attrInteger) {
-			while (first < firstSortedMid.length
-					&& second < secondSortedMid.length) {
-				if (firstSortedMid[first].getIntFld(1) < secondSortedMid[second]
-						.getIntFld(1)) {
+		if (order.tupleOrder == TupleOrder.Ascending) {
+			if (keyType == global.AttrType.attrInteger) {
+				while (first < firstSortedMid.length
+						&& second < secondSortedMid.length) {
+					if (firstSortedMid[first].getIntFld(1) < secondSortedMid[second]
+							.getIntFld(1)) {
+						mergeSorted[merge] = firstSortedMid[first];
+						first++;
+						merge++;
+					} else {
+						mergeSorted[merge] = secondSortedMid[second];
+						second++;
+						merge++;
+					}
+				}
+				while (first < firstSortedMid.length) {
 					mergeSorted[merge] = firstSortedMid[first];
 					first++;
 					merge++;
-				} else {
+				}
+				while (second < secondSortedMid.length) {
 					mergeSorted[merge] = secondSortedMid[second];
 					second++;
 					merge++;
-				}
-			}
-			while (first < firstSortedMid.length) {
-				mergeSorted[merge] = firstSortedMid[first];
-				first++;
-				merge++;
-			}
-			while (second < secondSortedMid.length) {
-				mergeSorted[merge] = secondSortedMid[second];
-				second++;
-				merge++;
 
+				}
+				return mergeSorted;
+			} else {
+				while (first < firstSortedMid.length
+						&& second < secondSortedMid.length) {
+					if ((firstSortedMid[first].getStrFld(1)
+							.compareTo(secondSortedMid[second].getStrFld(1))) < 1) {
+						mergeSorted[merge] = firstSortedMid[first];
+						first++;
+						merge++;
+					} else {
+						mergeSorted[merge] = secondSortedMid[second];
+						second++;
+						merge++;
+					}
+				}
+				while (first < firstSortedMid.length) {
+					mergeSorted[merge] = firstSortedMid[first];
+					first++;
+					merge++;
+				}
+				while (second < secondSortedMid.length) {
+					mergeSorted[merge] = secondSortedMid[second];
+					second++;
+					merge++;
+
+				}
+				return mergeSorted;
 			}
-			return mergeSorted;
 		} else {
-			while (first < firstSortedMid.length
-					&& second < secondSortedMid.length) {
-				if ((firstSortedMid[first].getStrFld(1)
-						.compareTo(secondSortedMid[second].getStrFld(1))) < 1) {
+			if (keyType == global.AttrType.attrInteger) {
+				while (first < firstSortedMid.length
+						&& second < secondSortedMid.length) {
+					if (firstSortedMid[first].getIntFld(1) > secondSortedMid[second]
+							.getIntFld(1)) {
+						mergeSorted[merge] = firstSortedMid[first];
+						first++;
+						merge++;
+					} else {
+						mergeSorted[merge] = secondSortedMid[second];
+						second++;
+						merge++;
+					}
+				}
+				while (first < firstSortedMid.length) {
 					mergeSorted[merge] = firstSortedMid[first];
 					first++;
 					merge++;
-				} else {
+				}
+				while (second < secondSortedMid.length) {
 					mergeSorted[merge] = secondSortedMid[second];
 					second++;
 					merge++;
-				}
-			}
-			while (first < firstSortedMid.length) {
-				mergeSorted[merge] = firstSortedMid[first];
-				first++;
-				merge++;
-			}
-			while (second < secondSortedMid.length) {
-				mergeSorted[merge] = secondSortedMid[second];
-				second++;
-				merge++;
 
+				}
+				return mergeSorted;
+			} else {
+				while (first < firstSortedMid.length
+						&& second < secondSortedMid.length) {
+					if ((firstSortedMid[first].getStrFld(1)
+							.compareTo(secondSortedMid[second].getStrFld(1))) > 1) {
+						mergeSorted[merge] = firstSortedMid[first];
+						first++;
+						merge++;
+					} else {
+						mergeSorted[merge] = secondSortedMid[second];
+						second++;
+						merge++;
+					}
+				}
+				while (first < firstSortedMid.length) {
+					mergeSorted[merge] = firstSortedMid[first];
+					first++;
+					merge++;
+				}
+				while (second < secondSortedMid.length) {
+					mergeSorted[merge] = secondSortedMid[second];
+					second++;
+					merge++;
+
+				}
+				return mergeSorted;
 			}
-			return mergeSorted;
 		}
 	}
 
