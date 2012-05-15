@@ -35,7 +35,6 @@ public class Sort extends Iterator implements GlobalConst {
 
 	// ------------------------------------------------------------------------
 	private static final int ARBIT_RUNS = 10;
-
 	private AttrType[] _in;// size will always be 1
 	private short n_cols; // equal 1
 	private short[] str_lens;// size is one and assigned from the constructor
