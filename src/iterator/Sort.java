@@ -141,7 +141,7 @@ public class Sort extends Iterator implements GlobalConst {
 			RID r = page.insertRecord(t.returnTupleByteArray());
 			if (r == null) {
 				System.out.println("7amada");
-				// page = sortPage(page);
+				page = sortPage(page);
 				RID dummyRID = page.firstRecord();
 				for (int i = 0; i < page.getSlotCnt(); i++) {
 					Tuple temp = page.getRecord(dummyRID);
@@ -159,6 +159,7 @@ public class Sort extends Iterator implements GlobalConst {
 			}
 			t = s.getNext(new RID());
 		}
+		v.add(hf);
 		System.out.println("size " + v.size());
 		return v;
 	}
