@@ -5,6 +5,7 @@ import global.Convert;
 import global.GlobalConst;
 import global.PageId;
 import global.RID;
+import global.SystemDefs;
 import global.TupleOrder;
 import heap.FieldNumberOutOfBoundException;
 import heap.HFBufMgrException;
@@ -131,10 +132,12 @@ public class Sort extends Iterator implements GlobalConst {
 		Heapfile hf = new Heapfile("Sorted");
 		Scan s = gFile.openScan();
 		Tuple t = s.getNext(new RID());
-		HFPage page = new HFPage();
+		Page p = new Page();
+		HFPage page = new HFPage(p);
+		page.init(page.getCurPage(), page);
 		int counter = 0;
 		while (t != null) {
-			RID r = page.insertRecord(t.getTupleByteArray());
+			RID r = page.insertRecord(t.returnTupleByteArray());
 			if (r == null) {
 				page = sortPage(page);
 				byte[] temp = page.getHFpageArray();
@@ -144,6 +147,7 @@ public class Sort extends Iterator implements GlobalConst {
 				counter++;
 				s = hf.openScan();
 				page = new HFPage();
+				page.init(page.getCurPage(), page);
 				page.insertRecord(t.getTupleByteArray());
 
 			}
@@ -192,6 +196,7 @@ public class Sort extends Iterator implements GlobalConst {
 		tupleArray = mergeSortPage(tupleArray);
 		for (int i = 0; i < tupleArray.length; i++) {
 			p.insertRecord(tupleArray[i].getTupleByteArray());
+			System.out.println(Convert.getStrValue(0, tupleArray[i].getTupleByteArray(), 10));
 		}
 		return p;
 	}
@@ -246,8 +251,11 @@ public class Sort extends Iterator implements GlobalConst {
 			} else {
 				while (first < firstSortedMid.length
 						&& second < secondSortedMid.length) {
-					if ((firstSortedMid[first].getStrFld(1)
-							.compareTo(secondSortedMid[second].getStrFld(1))) < 1) {
+					if ((Convert.getStrValue(0,
+							firstSortedMid[first].getTupleByteArray(), 10)
+							.compareTo(Convert
+									.getStrValue(0, secondSortedMid[second]
+											.getTupleByteArray(), 10))) < 1) {
 						mergeSorted[merge] = firstSortedMid[first];
 						first++;
 						merge++;
