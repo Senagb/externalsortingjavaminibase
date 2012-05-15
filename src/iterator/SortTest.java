@@ -11,6 +11,8 @@ import iterator.*;
 
 import java.util.Random;
 
+import chainexception.ChainException;
+
 class SORTDriver extends TestDriver implements GlobalConst {
 
 	private static String data1[] = { "raghu", "xbao", "cychan", "leela",
@@ -177,10 +179,21 @@ class SORTDriver extends TestDriver implements GlobalConst {
 				e.printStackTrace();
 			}
 		}
-		Scan s = f.openScan();
+		Scan s = null;
+		try {
+			s = f.openScan();
+		} catch (ChainException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		RID r = new RID();
 		Tuple temp = null;
-		s.getNext(r);
+		try {
+			s.getNext(r);
+		} catch (ChainException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		try {
 			temp = f.getRecord(r);
 		} catch (Exception e1) {
@@ -195,7 +208,12 @@ class SORTDriver extends TestDriver implements GlobalConst {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			s.getNext(r);
+			try {
+				s.getNext(r);
+			} catch (ChainException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			try {
 				temp = f.getRecord(r);
 			} catch (Exception e1) {

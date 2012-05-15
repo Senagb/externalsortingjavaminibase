@@ -5,7 +5,6 @@ import global.Convert;
 import global.GlobalConst;
 import global.PageId;
 import global.RID;
-import global.SystemDefs;
 import global.TupleOrder;
 import heap.FieldNumberOutOfBoundException;
 import heap.HFBufMgrException;
@@ -142,7 +141,7 @@ public class Sort extends Iterator implements GlobalConst {
 			RID r = page.insertRecord(t.returnTupleByteArray());
 			if (r == null) {
 				System.out.println("7amada");
-				page = sortPage(page);
+//				page = sortPage(page);
 				RID dummyRID = page.firstRecord();
 				for (int i = 0; i < page.getSlotCnt(); i++) {
 					Tuple temp = page.getRecord(dummyRID);
@@ -163,7 +162,7 @@ public class Sort extends Iterator implements GlobalConst {
 			while (t == null)
 				t = s.getNext(new RID());
 		}
-		System.out.println(v.size());
+		System.out.println("size "+ v.size());
 		return v;
 	}
 
@@ -179,8 +178,12 @@ public class Sort extends Iterator implements GlobalConst {
 		int size = t.size();
 
 		RID rid;
-		gFile = new Heapfile("test1.in");
-
+		try {
+			gFile = new Heapfile("test1.in");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 		t = new Tuple(size);
 		t.setHdr((short) 2, _in, str_lens);
 
@@ -189,7 +192,12 @@ public class Sort extends Iterator implements GlobalConst {
 		for (int i = 0; i < data1.length; i++) {
 
 			t.setStrFld(1, data1[i]);
-			rid = gFile.insertRecord(t.returnTupleByteArray());
+			try {
+				rid = gFile.insertRecord(t.returnTupleByteArray());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			System.out.println();
 
 		}
@@ -371,7 +379,13 @@ public class Sort extends Iterator implements GlobalConst {
 		Vector<Heapfile> h_Files = files;
 		Vector<Heapfile> new_Files = new Vector<Heapfile>();
 		while (size < h_Files.size()) {
-			Heapfile file = new Heapfile("Sorted1" + counter);
+			Heapfile file = null;
+			try {
+				file = new Heapfile("Sorted1" + counter);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 			Vector<Scan> h_Scanners = set_Scanners(h_Files, size);
 			size += h_Scanners.size();
 			Vector<Tuple> tuples = set_Tuples(h_Scanners);
@@ -379,7 +393,12 @@ public class Sort extends Iterator implements GlobalConst {
 					order.tupleOrder == TupleOrder.Ascending,
 					keyType == global.AttrType.attrInteger);
 			while (least != -1) {
-				file.insertRecord(tuples.get(least).getTupleByteArray()); // anhe
+				try {
+					file.insertRecord(tuples.get(least).getTupleByteArray());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} // anhe
 																			// byte
 																			// arraye
 																			// ele
@@ -387,7 +406,13 @@ public class Sort extends Iterator implements GlobalConst {
 																			// gowa
 																			// el
 																			// heapfile
-				tuples.set(least, h_Scanners.get(least).getNext(new RID()));
+				try {
+					tuples.set(least, h_Scanners.get(least).getNext(new RID()));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+					
 				least = max_min(tuples,
 						order.tupleOrder == TupleOrder.Ascending,
 						keyType == global.AttrType.attrInteger);
@@ -405,7 +430,12 @@ public class Sort extends Iterator implements GlobalConst {
 
 		Vector<Scan> h_Scanners = new Vector<Scan>();
 		for (int i = 0; i < start + 49; i++) {
-			h_Scanners.add(h_Files.get(i).openScan());
+			try {
+				h_Scanners.add(h_Files.get(i).openScan());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 			if (i == h_Files.size() - 1)
 				return h_Scanners;
 		}
@@ -417,7 +447,12 @@ public class Sort extends Iterator implements GlobalConst {
 
 		Vector<Tuple> tuples = new Vector<Tuple>();
 		for (int i = 0; i < h_Scanners.size(); i++) {
-			tuples.add(h_Scanners.get(i).getNext(new RID()));
+			try {
+				tuples.add(h_Scanners.get(i).getNext(new RID()));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 		}
 		return tuples;
 	}
