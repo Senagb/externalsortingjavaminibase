@@ -141,7 +141,7 @@ public class Sort extends Iterator implements GlobalConst {
 			RID r = page.insertRecord(t.returnTupleByteArray());
 			if (r == null) {
 				System.out.println("7amada");
-//				page = sortPage(page);
+				// page = sortPage(page);
 				RID dummyRID = page.firstRecord();
 				for (int i = 0; i < page.getSlotCnt(); i++) {
 					Tuple temp = page.getRecord(dummyRID);
@@ -152,17 +152,14 @@ public class Sort extends Iterator implements GlobalConst {
 				v.add(hf);
 				hf = new Heapfile("Sorted" + counter);
 				counter++;
-				s = hf.openScan();
 				page = new HFPage();
 				page.init(page.getCurPage(), page);
 				r = page.insertRecord(t.getTupleByteArray());
 
 			}
 			t = s.getNext(new RID());
-			while (t == null)
-				t = s.getNext(new RID());
 		}
-		System.out.println("size "+ v.size());
+		System.out.println("size " + v.size());
 		return v;
 	}
 
@@ -183,7 +180,7 @@ public class Sort extends Iterator implements GlobalConst {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
 		t = new Tuple(size);
 		t.setHdr((short) 2, _in, str_lens);
 
@@ -385,7 +382,7 @@ public class Sort extends Iterator implements GlobalConst {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			}
 			Vector<Scan> h_Scanners = set_Scanners(h_Files, size);
 			size += h_Scanners.size();
 			Vector<Tuple> tuples = set_Tuples(h_Scanners);
@@ -399,20 +396,20 @@ public class Sort extends Iterator implements GlobalConst {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} // anhe
-																			// byte
-																			// arraye
-																			// ele
-																			// haktebha
-																			// gowa
-																			// el
-																			// heapfile
+					// byte
+					// arraye
+					// ele
+					// haktebha
+					// gowa
+					// el
+					// heapfile
 				try {
 					tuples.set(least, h_Scanners.get(least).getNext(new RID()));
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-					
+
 				least = max_min(tuples,
 						order.tupleOrder == TupleOrder.Ascending,
 						keyType == global.AttrType.attrInteger);
@@ -435,7 +432,7 @@ public class Sort extends Iterator implements GlobalConst {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			}
 			if (i == h_Files.size() - 1)
 				return h_Scanners;
 		}
@@ -452,7 +449,7 @@ public class Sort extends Iterator implements GlobalConst {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			}
 		}
 		return tuples;
 	}
