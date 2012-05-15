@@ -178,16 +178,30 @@ class SORTDriver extends TestDriver implements GlobalConst {
 			}
 		}
 		Scan s = f.openScan();
-		Tuple temp = s.getNext(new RID());
+		RID r = new RID();
+		Tuple temp = null;
+		s.getNext(r);
+		try {
+			temp = f.getRecord(r);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		while (temp != null) {
 			try {
-				String s1 = t.getStrFld(1);
+				String s1 = temp.getStrFld(1);
 				System.out.println(s1);
 			} catch (FieldNumberOutOfBoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			temp = s.getNext(new RID());
+			s.getNext(r);
+			try {
+				temp = f.getRecord(r);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 
 		// create an iterator by open a file scan
