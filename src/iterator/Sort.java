@@ -139,9 +139,15 @@ public class Sort extends Iterator implements GlobalConst {
 		while (t != null) {
 			RID r = page.insertRecord(t.returnTupleByteArray());
 			if (r == null) {
+				
 				page = sortPage(page);
-				byte[] temp = page.getHFpageArray();
-				hf.insertRecord(temp);
+				RID dummyRID = page.firstRecord();
+				for (int i = 0; i < page.getSlotCnt(); i++) {
+					Tuple temp = page.getRecord(dummyRID);
+					hf.insertRecord(temp.getTupleByteArray());
+					dummyRID = page.nextRecord(dummyRID);
+				}
+
 				v.add(hf);
 				hf = new Heapfile("Sorted" + counter);
 				counter++;
@@ -153,6 +159,7 @@ public class Sort extends Iterator implements GlobalConst {
 			}
 			t = s.getNext(new RID());
 		}
+		
 		return v;
 	}
 
@@ -196,7 +203,8 @@ public class Sort extends Iterator implements GlobalConst {
 		tupleArray = mergeSortPage(tupleArray);
 		for (int i = 0; i < tupleArray.length; i++) {
 			p.insertRecord(tupleArray[i].getTupleByteArray());
-			System.out.println(Convert.getStrValue(0, tupleArray[i].getTupleByteArray(), 10));
+			System.out.println(Convert.getStrValue(0,
+					tupleArray[i].getTupleByteArray(), 10));
 		}
 		return p;
 	}
