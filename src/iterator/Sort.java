@@ -130,6 +130,8 @@ public class Sort extends Iterator implements GlobalConst {
 	public Vector<Heapfile> sortHeapfile() throws Exception {
 		Vector<Heapfile> v = new Vector<Heapfile>();
 		Heapfile hf = new Heapfile("Sorted");
+		int t1 = gFile.getRecCnt();
+		System.out.println(t1);
 		Scan s = gFile.openScan();
 		Tuple t = s.getNext(new RID());
 		Page p = new Page();
@@ -139,7 +141,7 @@ public class Sort extends Iterator implements GlobalConst {
 		while (t != null) {
 			RID r = page.insertRecord(t.returnTupleByteArray());
 			if (r == null) {
-				
+				System.out.println("7amada");
 				page = sortPage(page);
 				RID dummyRID = page.firstRecord();
 				for (int i = 0; i < page.getSlotCnt(); i++) {
@@ -147,19 +149,21 @@ public class Sort extends Iterator implements GlobalConst {
 					hf.insertRecord(temp.getTupleByteArray());
 					dummyRID = page.nextRecord(dummyRID);
 				}
-
+				System.out.println(hf.getRecCnt());
 				v.add(hf);
 				hf = new Heapfile("Sorted" + counter);
 				counter++;
 				s = hf.openScan();
 				page = new HFPage();
 				page.init(page.getCurPage(), page);
-				page.insertRecord(t.getTupleByteArray());
+				r = page.insertRecord(t.getTupleByteArray());
 
 			}
 			t = s.getNext(new RID());
+			while (t == null)
+				t = s.getNext(new RID());
 		}
-		
+		System.out.println(v.size());
 		return v;
 	}
 
