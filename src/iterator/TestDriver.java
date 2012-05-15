@@ -1,4 +1,6 @@
 package iterator;
+import heap.InvalidTupleSizeException;
+
 import java.io.*;
 import java.util.*;
 import java.lang.*;
@@ -67,8 +69,10 @@ public class TestDriver {
 
   /** 
    * @return whether the test has completely successfully 
+ * @throws IOException 
+ * @throws InvalidTupleSizeException 
    */
-  protected boolean test1 () { return true; }
+  protected boolean test1 () throws InvalidTupleSizeException, IOException { return true; }
   
   /** 
    * @return whether the test has completely successfully 
@@ -110,8 +114,10 @@ public class TestDriver {
    * running tests.
    *
    * @return a boolean value indicates whether ALL the tests have passed
+ * @throws IOException 
+ * @throws InvalidTupleSizeException 
    */
-  public boolean runTests ()  {
+  public boolean runTests () throws InvalidTupleSizeException, IOException  {
     
     System.out.println ("\n" + "Running " + testName() + " tests...." + "\n");
     
@@ -171,7 +177,7 @@ public class TestDriver {
     return _pass;
   }
 
-  protected boolean runAllTests() {
+  protected boolean runAllTests() throws InvalidTupleSizeException, IOException {
 
     boolean _passAll = OK;
 
