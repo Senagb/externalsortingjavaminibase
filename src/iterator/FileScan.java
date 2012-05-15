@@ -3,14 +3,16 @@
 
 	   
 
-	import heap.*;
-	import global.*;
-	import bufmgr.*;
-	import diskmgr.*;
+	import global.AttrType;
+import global.RID;
+import heap.FieldNumberOutOfBoundException;
+import heap.Heapfile;
+import heap.Scan;
+import heap.Tuple;
 
+import java.io.IOException;
 
-	import java.lang.*;
-	import java.io.*;
+import bufmgr.PageNotReadException;
 
 	/**
 	 *open a heapfile and according to the condition expression to get
@@ -132,9 +134,14 @@
 	      RID rid = new RID();;
 	      
 	      while(true) {
-		if((tuple1 =  scan.getNext(rid)) == null) {
-		  return null;
-		}
+		try {
+			if((tuple1 =  scan.getNext(rid)) == null) {
+			  return null;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 		
 		tuple1.setHdr(in1_len, _in1, s_sizes);
 		if (PredEval.Eval(OutputFilter, tuple1, null, _in1, null) == true){
