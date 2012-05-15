@@ -137,8 +137,10 @@ public class Sort extends Iterator implements GlobalConst {
 		HFPage page = new HFPage(p);
 		page.init(page.getCurPage(), page);
 		int counter = 0;
+		boolean entered = false;
 		while (t != null) {
 			RID r = page.insertRecord(t.returnTupleByteArray());
+			entered = false;
 			if (r == null) {
 				System.out.println("7amada");
 				page = sortPage(page);
@@ -155,11 +157,13 @@ public class Sort extends Iterator implements GlobalConst {
 				page = new HFPage();
 				page.init(page.getCurPage(), page);
 				r = page.insertRecord(t.getTupleByteArray());
+				entered = true;
 
 			}
 			t = s.getNext(new RID());
 		}
-		v.add(hf);
+		if (!entered)
+			v.add(hf);
 		System.out.println("size " + v.size());
 		return v;
 	}
