@@ -1,6 +1,7 @@
 package iterator;
 
 import global.AttrType;
+import global.Convert;
 import global.GlobalConst;
 import global.PageId;
 import global.RID;
@@ -21,6 +22,8 @@ import heap.Tuple;
 import java.io.IOException;
 import java.util.Vector;
 
+import diskmgr.Page;
+
 /**
  * The Sort class sorts a file. All necessary information are passed as
  * arguments to the constructor. After the constructor call, the user can
@@ -31,7 +34,22 @@ public class Sort extends Iterator implements GlobalConst {
 
 	private int keyType;
 	protected Heapfile gFile; // user given file
-	protected boolean Ascending = true;
+	private static String data1[] = { "raghu", "xbao", "cychan", "leela",
+			"ketola", "soma", "ulloa", "dhanoa", "dsilva", "kurniawa",
+			"dissoswa", "waic", "susanc", "kinc", "marc", "scottc", "yuc",
+			"ireland", "rathgebe", "joyce", "daode", "yuvadee", "he",
+			"huxtable", "muerle", "flechtne", "thiodore", "jhowe", "frankief",
+			"yiching", "xiaoming", "jsong", "yung", "muthiah", "bloch", "binh",
+			"dai", "hai", "handi", "shi", "sonthi", "evgueni", "chung-pi",
+			"chui", "siddiqui", "mak", "tak", "sungk", "randal", "barthel",
+			"newell", "schiesl", "neuman", "heitzman", "wan", "gunawan",
+			"djensen", "juei-wen", "josephin", "harimin", "xin", "zmudzin",
+			"feldmann", "joon", "wawrzon", "yi-chun", "wenchao", "seo",
+			"karsono", "dwiyono", "ginther", "keeler", "peter", "lukas",
+			"edwards", "mirwais", "schleis", "haris", "meyers", "azat",
+			"shun-kit", "robert", "markert", "wlau", "honghu", "guangshu",
+			"chingju", "bradw", "andyw", "gray", "vharvey", "awny", "savoy",
+			"meltz" };
 
 	// ------------------------------------------------------------------------
 	private static final int ARBIT_RUNS = 10;
@@ -103,6 +121,10 @@ public class Sort extends Iterator implements GlobalConst {
 		sortFldLen = sort_fld_len;
 	}
 
+	public void setHeapFile(Heapfile hf) {
+		gFile = hf;
+	}
+
 	// pass 0
 	public Vector<Heapfile> sortHeapfile() throws Exception {
 		Vector<Heapfile> v = new Vector<Heapfile>();
@@ -128,6 +150,35 @@ public class Sort extends Iterator implements GlobalConst {
 			t = s.getNext(new RID());
 		}
 		return v;
+	}
+
+	public void test() throws InvalidSlotNumberException,
+			InvalidTupleSizeException, SpaceNotAvailableException, HFException,
+			HFBufMgrException, HFDiskMgrException, IOException,
+			InvalidTypeException, FieldNumberOutOfBoundException {
+		Tuple t = new Tuple();
+		// Convert.setIntValue(data, 0, pg.getpage());
+		// Convert.setStrValue(paramString, paramInt, paramArrayOfByte)
+		t.setHdr((short) 2, _in, str_lens);
+
+		int size = t.size();
+
+		RID rid;
+		gFile = new Heapfile("test1.in");
+
+		t = new Tuple(size);
+		t.setHdr((short) 2, _in, str_lens);
+
+		t = new Tuple(size);
+		t.setHdr((short) 2, _in, str_lens);
+		for (int i = 0; i < data1.length; i++) {
+
+			t.setStrFld(1, data1[i]);
+			rid = gFile.insertRecord(t.returnTupleByteArray());
+			System.out.println();
+
+		}
+		System.out.println();
 	}
 
 	private HFPage sortPage(HFPage p) throws Exception {
@@ -280,7 +331,7 @@ public class Sort extends Iterator implements GlobalConst {
 			throws InvalidTupleSizeException, FieldNumberOutOfBoundException,
 			HFException, HFBufMgrException, HFDiskMgrException,
 			InvalidSlotNumberException, SpaceNotAvailableException, IOException {
-		
+
 		Vector<Heapfile> temp = files;
 		while (files.size() != 1) {
 			temp = run(temp);
@@ -294,7 +345,7 @@ public class Sort extends Iterator implements GlobalConst {
 			FieldNumberOutOfBoundException, HFException, HFBufMgrException,
 			HFDiskMgrException, InvalidSlotNumberException,
 			SpaceNotAvailableException {
-		
+
 		int size = 0;
 		int counter = 0;
 		Vector<Heapfile> h_Files = files;
@@ -331,7 +382,7 @@ public class Sort extends Iterator implements GlobalConst {
 
 	private Vector<Scan> set_Scanners(Vector<Heapfile> h_Files, int start)
 			throws InvalidTupleSizeException, IOException {
-		
+
 		Vector<Scan> h_Scanners = new Vector<Scan>();
 		for (int i = 0; i < start + 49; i++) {
 			h_Scanners.add(h_Files.get(i).openScan());
@@ -343,7 +394,7 @@ public class Sort extends Iterator implements GlobalConst {
 
 	private Vector<Tuple> set_Tuples(Vector<Scan> h_Scanners)
 			throws InvalidTupleSizeException, IOException {
-		
+
 		Vector<Tuple> tuples = new Vector<Tuple>();
 		for (int i = 0; i < h_Scanners.size(); i++) {
 			tuples.add(h_Scanners.get(i).getNext(new RID()));
@@ -354,7 +405,7 @@ public class Sort extends Iterator implements GlobalConst {
 	private int max_min(Vector<Tuple> tuples, boolean isAscending,
 			boolean isInteger) throws FieldNumberOutOfBoundException,
 			IOException {
-		
+
 		int target = 0;
 		boolean empty = true;
 		if (isAscending) {
@@ -448,9 +499,5 @@ public class Sort extends Iterator implements GlobalConst {
 	 *                something went wrong in the lower layer.
 	 */
 	public void close() throws SortException, IOException {
-	}
-
-	public static void main(String[] args)
-			throws FieldNumberOutOfBoundException, IOException {
 	}
 }
