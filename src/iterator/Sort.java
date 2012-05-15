@@ -168,44 +168,6 @@ public class Sort extends Iterator implements GlobalConst {
 		return v;
 	}
 
-	public void test() throws InvalidSlotNumberException,
-			InvalidTupleSizeException, SpaceNotAvailableException, HFException,
-			HFBufMgrException, HFDiskMgrException, IOException,
-			InvalidTypeException, FieldNumberOutOfBoundException {
-		Tuple t = new Tuple();
-		// Convert.setIntValue(data, 0, pg.getpage());
-		// Convert.setStrValue(paramString, paramInt, paramArrayOfByte)
-		t.setHdr((short) 2, _in, str_lens);
-
-		int size = t.size();
-
-		RID rid;
-		try {
-			gFile = new Heapfile("test1.in");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		t = new Tuple(size);
-		t.setHdr((short) 2, _in, str_lens);
-
-		t = new Tuple(size);
-		t.setHdr((short) 2, _in, str_lens);
-		for (int i = 0; i < data1.length; i++) {
-
-			t.setStrFld(1, data1[i]);
-			try {
-				rid = gFile.insertRecord(t.returnTupleByteArray());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println();
-
-		}
-		System.out.println();
-	}
-
 	private HFPage sortPage(HFPage p) throws Exception {
 		Tuple[] tupleArray = new Tuple[p.getSlotCnt()];
 		RID dummyrid = p.firstRecord();
@@ -247,8 +209,10 @@ public class Sort extends Iterator implements GlobalConst {
 			if (keyType == global.AttrType.attrInteger) {
 				while (first < firstSortedMid.length
 						&& second < secondSortedMid.length) {
-					if (firstSortedMid[first].getIntFld(1) < secondSortedMid[second]
-							.getIntFld(1)) {
+					if (Convert.getIntValue(0,
+							firstSortedMid[first].getTupleByteArray()) < Convert
+							.getIntValue(0,
+									secondSortedMid[second].getTupleByteArray())) {
 						mergeSorted[merge] = firstSortedMid[first];
 						first++;
 						merge++;
@@ -274,10 +238,10 @@ public class Sort extends Iterator implements GlobalConst {
 				while (first < firstSortedMid.length
 						&& second < secondSortedMid.length) {
 					if ((Convert.getStrValue(0,
-							firstSortedMid[first].getTupleByteArray(), 10)
-							.compareTo(Convert
-									.getStrValue(0, secondSortedMid[second]
-											.getTupleByteArray(), 10))) < 1) {
+							firstSortedMid[first].getTupleByteArray(),
+							sortFldLen).compareTo(Convert.getStrValue(0,
+							secondSortedMid[second].getTupleByteArray(),
+							sortFldLen))) < 1) {
 						mergeSorted[merge] = firstSortedMid[first];
 						first++;
 						merge++;
@@ -304,8 +268,10 @@ public class Sort extends Iterator implements GlobalConst {
 			if (keyType == global.AttrType.attrInteger) {
 				while (first < firstSortedMid.length
 						&& second < secondSortedMid.length) {
-					if (firstSortedMid[first].getIntFld(1) > secondSortedMid[second]
-							.getIntFld(1)) {
+					if (Convert.getIntValue(0,
+							firstSortedMid[first].getTupleByteArray()) > Convert
+							.getIntValue(0,
+									secondSortedMid[second].getTupleByteArray())) {
 						mergeSorted[merge] = firstSortedMid[first];
 						first++;
 						merge++;
@@ -330,8 +296,11 @@ public class Sort extends Iterator implements GlobalConst {
 			} else {
 				while (first < firstSortedMid.length
 						&& second < secondSortedMid.length) {
-					if ((firstSortedMid[first].getStrFld(1)
-							.compareTo(secondSortedMid[second].getStrFld(1))) > 1) {
+					if ((Convert.getStrValue(0,
+							firstSortedMid[first].getTupleByteArray(),
+							sortFldLen).compareTo(Convert.getStrValue(0,
+							secondSortedMid[second].getTupleByteArray(),
+							sortFldLen))) > 1) {
 						mergeSorted[merge] = firstSortedMid[first];
 						first++;
 						merge++;

@@ -86,7 +86,7 @@ public class MyTest extends TestDriver implements GlobalConst {
 		order[1] = new TupleOrder(TupleOrder.Descending);
 
 		Sort sort = new Sort(attrType, (short) 2, attrSize, null, 0, order[0],
-				8, SORTPGNUM);
+				data1[0].length()+2, SORTPGNUM);
 		sort.setHeapFile(hf);
 		sort.sortHeapfile();
 	}
