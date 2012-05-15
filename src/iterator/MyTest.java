@@ -1,22 +1,16 @@
 package iterator;
 
-import java.io.IOException;
-
-import chainexception.ChainException;
-
-import diskmgr.DB;
 import global.Convert;
 import global.GlobalConst;
 import global.RID;
 import global.SystemDefs;
-import heap.HFBufMgrException;
-import heap.HFDiskMgrException;
-import heap.HFException;
 import heap.Heapfile;
-import heap.InvalidSlotNumberException;
-import heap.InvalidTupleSizeException;
-import heap.SpaceNotAvailableException;
+import heap.Scan;
 import heap.Tuple;
+
+import java.io.IOException;
+
+import chainexception.ChainException;
 
 public class MyTest extends TestDriver implements GlobalConst {
 	Heapfile hf;
@@ -47,10 +41,11 @@ public class MyTest extends TestDriver implements GlobalConst {
 			Convert.setStrValue(data1[i], 0, array);
 			hf.insertRecord(array);
 		}
-		test tt= new test(hf, "scanTest");
+//		test tt= new test(hf, "scanTest");
+		Scan s =hf.openScan();
 		RID rr= new RID();
 		for(int i=0;i<data1.length;i++){
-		Tuple l=tt.getNext(rr);
+		Tuple l=s.getNext(rr);
 		byte [] o=l.getTupleByteArray();
 		String temp="";
 		temp=Convert.getStrValue(0, o, o.length);
