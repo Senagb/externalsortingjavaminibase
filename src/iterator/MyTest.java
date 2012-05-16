@@ -1,5 +1,6 @@
 package iterator;
 
+import java.io.IOException;
 import java.util.Random;
 
 import global.AttrType;
@@ -87,7 +88,45 @@ public class MyTest extends TestDriver implements GlobalConst {
 	}
 	public MyTest() throws Exception {
 		super("hptest");
-		SystemDefs sysdef = new SystemDefs(dbpath, 300, NUMBUF, "Clock");
+		//SystemDefs sysdef = new SystemDefs(dbpath, 300, NUMBUF, "Clock");
+	//****************************************************************
+
+		System.out
+				.println("\n" + "Running " + testName() + " tests...." + "\n");
+
+		SystemDefs sysdef = new SystemDefs(dbpath, 1000, 700, "Clock");
+
+		// Kill anything that might be hanging around
+		String newdbpath;
+		String newlogpath;
+		String remove_logcmd;
+		String remove_dbcmd;
+		String remove_cmd = "cmd /c del <dbpath, logpath path>";
+
+		newdbpath = dbpath;
+		newlogpath = logpath;
+
+		remove_logcmd = remove_cmd + logpath;
+		remove_dbcmd = remove_cmd + dbpath;
+
+		// Commands here is very machine dependent. We assume
+		// user are on UNIX system here
+		try {
+			Runtime.getRuntime().exec(remove_logcmd);
+			Runtime.getRuntime().exec(remove_dbcmd);
+		} catch (IOException e) {
+			System.err.println("IO error: " + e);
+		}
+
+		remove_logcmd = remove_cmd + newlogpath;
+		remove_dbcmd = remove_cmd + newdbpath;
+
+		try {
+			Runtime.getRuntime().exec(remove_logcmd);
+			Runtime.getRuntime().exec(remove_dbcmd);
+		} catch (IOException e) {
+			System.err.println("IO error: " + e);
+		}
 		hf = new Heapfile("sTest");
 		int max=0;
 		for(int i=0;i<data1.length;i++)
@@ -104,7 +143,7 @@ public class MyTest extends TestDriver implements GlobalConst {
 		}
 		
 		//data1=generateRandomStrings(9500);
-		int [] num=generateRandomInt(1600);
+		int [] num=generateRandomInt(9500);
 		for (int i = 0; i < num.length; i++) {
 			byte[] array = new byte[4];
 			Convert.setIntValue(num[i], 0, array);	
@@ -130,7 +169,19 @@ public class MyTest extends TestDriver implements GlobalConst {
 				REC_LEN1, SORTPGNUM);
 		sort.setHeapFile(hf);
 		sort.organizer();
-	}
+
+	
+		// Clean up again
+		try {
+			Runtime.getRuntime().exec(remove_logcmd);
+			Runtime.getRuntime().exec(remove_dbcmd);
+		} catch (IOException e) {
+			System.err.println("IO error: " + e);
+		}
+
+	
+		//***********************************************************
+			}
 
 	public static void main(String[] args) throws Exception {
 		MyTest o = new MyTest();
