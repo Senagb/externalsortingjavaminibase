@@ -164,23 +164,34 @@ public class Sort extends Iterator implements GlobalConst {
 					hf.insertRecord(temp.getTupleByteArray());
 					dummyRID = page.nextRecord(dummyRID);
 				}
-				System.out.println(hf.getRecCnt());
+				// System.out.println(hf.getRecCnt());
 				v.add(hf);
-				String name = "Sorted" + counter;
-				System.out.println(name);
-				hf = new Heapfile(name);
+				System.out.println(hf.getRecCnt());
+				// String name = "Sorted" + counter;
+				// System.out.println(name);
+				hf = new Heapfile("Sorted" + counter);
 				counter++;
 				page = new HFPage();
 				page.init(page.getCurPage(), page);
 				r = page.insertRecord(t.getTupleByteArray());
 				entered = true;
-				System.out.println(numOfPages
-						+ " ------------------------------------------");
+				// System.out.println(numOfPages
+				// + " ------------------------------------------");
 			}
 			t = s.getNext(new RID());
 		}
-		if (!entered)
+		if (!entered) {
+			page = sortPage(page);
+			RID dummyRID = page.firstRecord();
+			for (int i = 0; i < page.getSlotCnt(); i++) {
+				Tuple temp = page.getRecord(dummyRID);
+				hf.insertRecord(temp.getTupleByteArray());
+				dummyRID = page.nextRecord(dummyRID);
+			}
 			v.add(hf);
+		}
+		for (int i = 0; i < v.size(); i++)
+			System.out.println(i + " / " + v.get(i).getRecCnt());
 		System.out.println("size " + v.size());
 		System.out.println("Number of Pages: " + numOfPages);
 		return v;
@@ -197,8 +208,8 @@ public class Sort extends Iterator implements GlobalConst {
 		tupleArray = mergeSortPage(tupleArray);
 		for (int i = 0; i < tupleArray.length; i++) {
 			p.insertRecord(tupleArray[i].getTupleByteArray());
-			System.out.println(Convert.getIntValue(0,
-					tupleArray[i].getTupleByteArray()));
+			// System.out.println(Convert.getIntValue(0,
+			// tupleArray[i].getTupleByteArray()));
 		}
 		return p;
 	}
