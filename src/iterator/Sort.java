@@ -142,7 +142,6 @@ public class Sort extends Iterator implements GlobalConst {
 			RID r = page.insertRecord(t.returnTupleByteArray());
 			entered = false;
 			if (r == null) {
-				System.out.println("7amada");
 				page = sortPage(page);
 				RID dummyRID = page.firstRecord();
 				for (int i = 0; i < page.getSlotCnt(); i++) {
@@ -158,7 +157,7 @@ public class Sort extends Iterator implements GlobalConst {
 				page.init(page.getCurPage(), page);
 				r = page.insertRecord(t.getTupleByteArray());
 				entered = true;
-
+				System.out.println("------------------------------------------");
 			}
 			t = s.getNext(new RID());
 		}
@@ -180,7 +179,7 @@ public class Sort extends Iterator implements GlobalConst {
 		for (int i = 0; i < tupleArray.length; i++) {
 			p.insertRecord(tupleArray[i].getTupleByteArray());
 			System.out.println(Convert.getStrValue(0,
-					tupleArray[i].getTupleByteArray(), 10));
+					tupleArray[i].getTupleByteArray(), sortFldLen));
 		}
 		return p;
 	}
@@ -326,6 +325,15 @@ public class Sort extends Iterator implements GlobalConst {
 		}
 	}
 
+	public void organizer() throws InvalidTupleSizeException,
+			FieldNumberOutOfBoundException, HFException, HFBufMgrException,
+			HFDiskMgrException, InvalidSlotNumberException,
+			SpaceNotAvailableException, IOException, Exception {
+		Vector<Heapfile> temp = sort_Runs(sortHeapfile());
+		Heapfile t = temp.elementAt(0);
+
+	}
+
 	public Vector<Heapfile> sort_Runs(Vector<Heapfile> files)
 			throws InvalidTupleSizeException, FieldNumberOutOfBoundException,
 			HFException, HFBufMgrException, HFDiskMgrException,
@@ -438,8 +446,10 @@ public class Sort extends Iterator implements GlobalConst {
 			if (isInteger) {
 				for (int i = 0; i < tuples.size(); i++) {
 					if (tuples.get(i) != null
-							&& tuples.get(i).getIntFld(1) < tuples.get(target)
-									.getIntFld(1)) {
+							&& Convert.getIntValue(0, tuples.get(i)
+									.getTupleByteArray()) < Convert
+									.getIntValue(0, tuples.get(target)
+											.getTupleByteArray())) {
 						target = i;
 						empty = false;
 					} else if (tuples.get(i) != null) {
@@ -448,9 +458,20 @@ public class Sort extends Iterator implements GlobalConst {
 				}
 			} else {
 				for (int i = 0; i < tuples.size(); i++) {
+					if(tuples.get(i)!=null){
+					String f=Convert.getStrValue(0,
+							tuples.get(i).getTupleByteArray(),
+							sortFldLen);
+					String s=Convert.getStrValue(0, tuples.get(target)
+							.getTupleByteArray(), sortFldLen);
+					System.out.println();
+					}
 					if (tuples.get(i) != null
-							&& tuples.get(i).getStrFld(1)
-									.compareTo(tuples.get(target).getStrFld(1)) < 0) {
+							&& Convert.getStrValue(0,
+									tuples.get(i).getTupleByteArray(),
+									sortFldLen).compareTo(
+									Convert.getStrValue(0, tuples.get(target)
+											.getTupleByteArray(), sortFldLen)) < 0) {
 						target = i;
 						empty = false;
 					} else if (tuples.get(i) != null) {
@@ -463,8 +484,10 @@ public class Sort extends Iterator implements GlobalConst {
 			if (isInteger) {
 				for (int i = 0; i < tuples.size(); i++) {
 					if (tuples.get(i) != null
-							&& tuples.get(i).getIntFld(1) > tuples.get(target)
-									.getIntFld(1)) {
+							&& Convert.getIntValue(0, tuples.get(i)
+									.getTupleByteArray()) > Convert
+									.getIntValue(0, tuples.get(target)
+											.getTupleByteArray())) {
 						target = i;
 						empty = false;
 					} else if (tuples.get(i) != null) {
@@ -474,8 +497,11 @@ public class Sort extends Iterator implements GlobalConst {
 			} else {
 				for (int i = 0; i < tuples.size(); i++) {
 					if (tuples.get(i) != null
-							&& tuples.get(i).getStrFld(1)
-									.compareTo(tuples.get(target).getStrFld(1)) > 0) {
+							&& Convert.getStrValue(0,
+									tuples.get(i).getTupleByteArray(),
+									sortFldLen).compareTo(
+									Convert.getStrValue(0, tuples.get(target)
+											.getTupleByteArray(), sortFldLen)) > 0) {
 						target = i;
 						empty = false;
 					} else if (tuples.get(i) != null) {
