@@ -1,5 +1,9 @@
 package iterator;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
@@ -78,13 +82,18 @@ public class MyTest extends TestDriver implements GlobalConst {
 		}
 		return array;
 	}
-	public int [] generateRandomInt(int num)
+	public int [] read() throws IOException
 	{
-		int [] array = new int[num];
-		Random rd = new Random();
-		for(int i=0;i<num;i++)
-			array[i]=rd.nextInt(1000);
-		return array;
+		BufferedReader br=new BufferedReader(new FileReader("test.txt"));
+		String [] s=br.readLine().split(" ");
+		int a []=new int [s.length];
+		for(int i=0;i<a.length;i++)
+		{
+			a[i]=Integer.parseInt(s[i]);
+		}
+		br.close();
+		return a;
+		
 	}
 	public MyTest() throws Exception {
 		super("hptest");
@@ -143,7 +152,7 @@ public class MyTest extends TestDriver implements GlobalConst {
 		}
 		
 		//data1=generateRandomStrings(9500);
-		int [] num=generateRandomInt(1500);
+		int [] num=read();
 		for (int i = 0; i < num.length; i++) {
 			byte[] array = new byte[4];
 			Convert.setIntValue(num[i], 0, array);	
