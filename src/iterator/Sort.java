@@ -442,9 +442,18 @@ public class Sort extends Iterator implements GlobalConst {
 
 		int target = 0;
 		boolean empty = true;
+		int j=0;
+		for(j=0;j<tuples.size();j++)
+		{
+			if (tuples.get(j) != null)
+			{
+				target=j;
+				break;
+			}
+		}
 		if (isAscending) {
 			if (isInteger) {
-				for (int i = 0; i < tuples.size(); i++) {
+				for (int i = j; i < tuples.size(); i++) {
 					if (tuples.get(i) != null
 							&& Convert.getIntValue(0, tuples.get(i)
 									.getTupleByteArray()) < Convert
@@ -457,7 +466,7 @@ public class Sort extends Iterator implements GlobalConst {
 					}
 				}
 			} else {
-				for (int i = 0; i < tuples.size(); i++) {
+				for (int i = j; i < tuples.size(); i++) {
 					if(tuples.get(i)!=null){
 					String f=Convert.getStrValue(0,
 							tuples.get(i).getTupleByteArray(),
@@ -482,7 +491,7 @@ public class Sort extends Iterator implements GlobalConst {
 
 		} else {
 			if (isInteger) {
-				for (int i = 0; i < tuples.size(); i++) {
+				for (int i = j; i < tuples.size(); i++) {
 					if (tuples.get(i) != null
 							&& Convert.getIntValue(0, tuples.get(i)
 									.getTupleByteArray()) > Convert
@@ -495,7 +504,7 @@ public class Sort extends Iterator implements GlobalConst {
 					}
 				}
 			} else {
-				for (int i = 0; i < tuples.size(); i++) {
+				for (int i = j; i < tuples.size(); i++) {
 					if (tuples.get(i) != null
 							&& Convert.getStrValue(0,
 									tuples.get(i).getTupleByteArray(),
