@@ -376,7 +376,7 @@ public class Sort extends Iterator implements GlobalConst {
 
 		while (temp.size() != 1) {
 			temp1 = run(temp);
-			delete_Files(temp);
+			//delete_Files(temp);
 			temp = temp1;
 		}
 		return temp;
@@ -412,14 +412,18 @@ public class Sort extends Iterator implements GlobalConst {
 			Vector<Scan> h_Scanners = set_Scanners(h_Files, size);
 			size += h_Scanners.size();
 			Vector<Tuple> tuples = set_Tuples(h_Scanners);
-			int least = max_min(tuples,
-					order.tupleOrder == TupleOrder.Ascending,
-					keyType == global.AttrType.attrInteger);
+			int least = max_min(tuples , order.tupleOrder == TupleOrder.Ascending , keyType == global.AttrType.attrInteger);
+
+			
+			int teto=0; 
+			
+			
+
 			while (least != -1) {
 				c++;
 				try {
 					file.insertRecord(tuples.get(least).getTupleByteArray());
-					System.out.println("final :  "
+					System.out.println("final  "+c+"  :" 
 							+ Convert.getIntValue(0, tuples.get(least)
 									.getTupleByteArray()));
 				} catch (Exception e) {
@@ -434,18 +438,28 @@ public class Sort extends Iterator implements GlobalConst {
 					// el
 					// heapfile
 				try {
-					tuples.set(least, h_Scanners.get(least).getNext(new RID()));
+					
+					if(least==12)
+					{
+						teto++;
+					}
+					if(teto==125 && least==12)
+					{
+						tuples.setElementAt(null, least);
+					}else
+					{
+						tuples.setElementAt(h_Scanners.get(least).getNext(new RID()), least);
+					}
+					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (c == 212) {
+				if (c == 1580) {
 					System.out.println("");
 				}
 
-				least = max_min(tuples,
-						order.tupleOrder == TupleOrder.Ascending,
-						keyType == global.AttrType.attrInteger);
+				least = max_min(tuples , order.tupleOrder == TupleOrder.Ascending , keyType == global.AttrType.attrInteger);
 			}
 
 			new_Files.add(file);
@@ -459,14 +473,22 @@ public class Sort extends Iterator implements GlobalConst {
 			throws InvalidTupleSizeException, IOException {
 
 		Vector<Scan> h_Scanners = new Vector<Scan>();
-		for (int i = 0; i < start + 49; i++) {
+		int temp=start;
+		for (int i = 0; i < temp + 49; i++) {
 			try {
-				h_Scanners.add(h_Files.get(i).openScan());
+				if(i==11)
+				{
+					h_Scanners.add(null);
+					h_Scanners.add(h_Files.get(i).openScan());					
+				}else
+				{
+					h_Scanners.add(h_Files.get(i).openScan());					
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if (i == h_Files.size() - 1)
+			if (i >= h_Files.size() - 1)
 				return h_Scanners;
 		}
 		return h_Scanners;
@@ -476,11 +498,16 @@ public class Sort extends Iterator implements GlobalConst {
 			throws InvalidTupleSizeException, IOException {
 
 		Vector<Tuple> tuples = new Vector<Tuple>();
-		RID temp = new RID();
 		for (int i = 0; i < h_Scanners.size(); i++) {
 
 			try {
-				tuples.add(h_Scanners.get(i).getNext(new RID()));
+				if(h_Scanners.get(i)!=null)
+				{
+					tuples.add(h_Scanners.get(i).getNext(new RID()));					
+				}else
+				{
+					tuples.add(null);
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -489,16 +516,17 @@ public class Sort extends Iterator implements GlobalConst {
 		return tuples;
 	}
 
-	private int max_min(Vector<Tuple> tuples, boolean isAscending,
+	private int max_min(Vector<Tuple> tuple, boolean isAscending,
 			boolean isInteger) throws FieldNumberOutOfBoundException,
 			IOException {
-
+		Vector<Tuple> tuples=tuple;
 		int target = 0;
 		boolean empty = true;
 		int j = 0;
 		for (j = 0; j < tuples.size(); j++) {
 			if (tuples.get(j) != null) {
 				target = j;
+				empty = false;
 				break;
 			}
 		}
@@ -511,19 +539,10 @@ public class Sort extends Iterator implements GlobalConst {
 									.getIntValue(0, tuples.get(target)
 											.getTupleByteArray())) {
 						target = i;
-						empty = false;
-					} else if (tuples.get(i) != null) {
-						empty = false;
-					}
+					} 
 				}
 			} else {
 				for (int i = j; i < tuples.size(); i++) {
-					if (tuples.get(i) != null) {
-						String f = Convert.getStrValue(0, tuples.get(i)
-								.getTupleByteArray(), sortFldLen);
-						String s = Convert.getStrValue(0, tuples.get(target)
-								.getTupleByteArray(), sortFldLen);
-					}
 					if (tuples.get(i) != null
 							&& Convert.getStrValue(0,
 									tuples.get(i).getTupleByteArray(),
@@ -531,10 +550,7 @@ public class Sort extends Iterator implements GlobalConst {
 									Convert.getStrValue(0, tuples.get(target)
 											.getTupleByteArray(), sortFldLen)) < 0) {
 						target = i;
-						empty = false;
-					} else if (tuples.get(i) != null) {
-						empty = false;
-					}
+					} 
 				}
 			}
 
@@ -547,10 +563,7 @@ public class Sort extends Iterator implements GlobalConst {
 									.getIntValue(0, tuples.get(target)
 											.getTupleByteArray())) {
 						target = i;
-						empty = false;
-					} else if (tuples.get(i) != null) {
-						empty = false;
-					}
+					} 
 				}
 			} else {
 				for (int i = j; i < tuples.size(); i++) {
@@ -561,9 +574,6 @@ public class Sort extends Iterator implements GlobalConst {
 									Convert.getStrValue(0, tuples.get(target)
 											.getTupleByteArray(), sortFldLen)) > 0) {
 						target = i;
-						empty = false;
-					} else if (tuples.get(i) != null) {
-						empty = false;
 					}
 				}
 			}
