@@ -7,6 +7,7 @@ import global.PageId;
 import global.RID;
 import global.TupleOrder;
 import heap.FieldNumberOutOfBoundException;
+import heap.FileAlreadyDeletedException;
 import heap.HFBufMgrException;
 import heap.HFDiskMgrException;
 import heap.HFException;
@@ -33,6 +34,7 @@ import diskmgr.Page;
 public class Sort extends Iterator implements GlobalConst {
 
 	private int keyType;
+	private int counter = 0;
 	protected Heapfile gFile; // user given file
 	private static String data1[] = { "raghu", "xbao", "cychan", "leela",
 			"ketola", "soma", "ulloa", "dhanoa", "dsilva", "kurniawa",
@@ -337,14 +339,25 @@ public class Sort extends Iterator implements GlobalConst {
 	public Vector<Heapfile> sort_Runs(Vector<Heapfile> files)
 			throws InvalidTupleSizeException, FieldNumberOutOfBoundException,
 			HFException, HFBufMgrException, HFDiskMgrException,
-			InvalidSlotNumberException, SpaceNotAvailableException, IOException {
+			InvalidSlotNumberException, SpaceNotAvailableException, IOException, FileAlreadyDeletedException {
 
 		Vector<Heapfile> temp = files;
-		while (files.size() != 1) {
-			temp = run(temp);
+		Vector<Heapfile> temp1 ;
+		
+		while (temp.size() != 1) {
+			temp1 = run(temp);
+			delete_Files(temp);
+			temp=temp1;
 		}
-
 		return temp;
+	}
+	
+	private void delete_Files(Vector<Heapfile> hf) throws InvalidSlotNumberException, FileAlreadyDeletedException, InvalidTupleSizeException, HFBufMgrException, HFDiskMgrException, IOException
+	{
+		for(int i=0;i<hf.size();i++)
+		{
+			hf.get(i).deleteFile();	
+		}
 	}
 
 	private Vector<Heapfile> run(Vector<Heapfile> files)
@@ -354,7 +367,7 @@ public class Sort extends Iterator implements GlobalConst {
 			SpaceNotAvailableException {
 
 		int size = 0;
-		int counter = 0;
+		int c=0;
 		Vector<Heapfile> h_Files = files;
 		Vector<Heapfile> new_Files = new Vector<Heapfile>();
 		while (size < h_Files.size()) {
@@ -372,8 +385,12 @@ public class Sort extends Iterator implements GlobalConst {
 					order.tupleOrder == TupleOrder.Ascending,
 					keyType == global.AttrType.attrInteger);
 			while (least != -1) {
+				c++;
 				try {
 					file.insertRecord(tuples.get(least).getTupleByteArray());
+					System.out.println("final :  "+ Convert.getStrValue(0,
+						       tuples.get(least).getTupleByteArray(),
+						       sortFldLen));
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -390,6 +407,10 @@ public class Sort extends Iterator implements GlobalConst {
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}
+				if(c==212)
+				{
+					System.out.println("");
 				}
 
 				least = max_min(tuples,
@@ -415,7 +436,7 @@ public class Sort extends Iterator implements GlobalConst {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if (i == h_Files.size() - 1)
+			if (i == h_Files.size()-1)
 				return h_Scanners;
 		}
 		return h_Scanners;
@@ -425,7 +446,9 @@ public class Sort extends Iterator implements GlobalConst {
 			throws InvalidTupleSizeException, IOException {
 
 		Vector<Tuple> tuples = new Vector<Tuple>();
+		RID temp=new RID();
 		for (int i = 0; i < h_Scanners.size(); i++) {
+			
 			try {
 				tuples.add(h_Scanners.get(i).getNext(new RID()));
 			} catch (Exception e) {
