@@ -166,8 +166,6 @@ public class Sort extends Iterator implements GlobalConst {
 				}
 				System.out.println(hf.getRecCnt());
 				v.add(hf);
-				if (counter == 16)
-					counter++;
 				String name = "Sorted" + counter;
 				System.out.println(name);
 				hf = new Heapfile(name);

@@ -86,9 +86,9 @@ public class MyTest extends TestDriver implements GlobalConst {
 		return array;
 	}
 	public MyTest() throws Exception {
-		super("sorttest");
+		super("hptest");
 		SystemDefs sysdef = new SystemDefs(dbpath, 300, NUMBUF, "Clock");
-		hf = new Heapfile("scanTest");
+		hf = new Heapfile("sTest");
 		int max=0;
 		for(int i=0;i<data1.length;i++)
 		{
@@ -103,8 +103,8 @@ public class MyTest extends TestDriver implements GlobalConst {
 			}
 		}
 		
-		data1=generateRandomStrings(9500);
-		int [] num=generateRandomInt(700);
+		//data1=generateRandomStrings(9500);
+		int [] num=generateRandomInt(1600);
 		for (int i = 0; i < num.length; i++) {
 			byte[] array = new byte[4];
 			Convert.setIntValue(num[i], 0, array);	
