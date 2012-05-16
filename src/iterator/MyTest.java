@@ -1,5 +1,7 @@
 package iterator;
 
+import java.util.Random;
+
 import global.AttrType;
 import global.Convert;
 import global.GlobalConst;
@@ -58,7 +60,31 @@ public class MyTest extends TestDriver implements GlobalConst {
 	private static short REC_LEN1 = 8;
 	private static short REC_LEN2 = 160;
 	private static int SORTPGNUM = 12;
-
+	public String [] generateRandomStrings(int num)
+	{
+		String [] array= new String [num];
+		Random rd = new Random();
+		for (int i = 0; i < num; i++) {
+			String current = "";
+			for (int j = 0; j < 8; j++) {
+				int n = rd.nextInt(57) + 65;
+				while (n > 90 && n < 97) {
+					n = rd.nextInt(57) + 65;
+				}
+				current += "" + (char) n;
+			}
+			array[i]=current;
+		}
+		return array;
+	}
+	public int [] generateRandomInt(int num)
+	{
+		int [] array = new int[num];
+		Random rd = new Random();
+		for(int i=0;i<num;i++)
+			array[i]=rd.nextInt(1000);
+		return array;
+	}
 	public MyTest() throws Exception {
 		super("sorttest");
 		SystemDefs sysdef = new SystemDefs(dbpath, 300, NUMBUF, "Clock");
@@ -76,13 +102,22 @@ public class MyTest extends TestDriver implements GlobalConst {
 				}
 			}
 		}
-		for (int i = 0; i < data1.length; i++) {
-			byte[] array = new byte[data1[i].length() + 2];
-			Convert.setStrValue(data1[i], 0, array);
+		
+		data1=generateRandomStrings(9500);
+		int [] num=generateRandomInt(700);
+		for (int i = 0; i < num.length; i++) {
+			byte[] array = new byte[4];
+			Convert.setIntValue(num[i], 0, array);	
 			hf.insertRecord(array);
 		}
+
+		//		for (int i = 0; i < data1.length; i++) {
+//			byte[] array = new byte[data1[i].length() + 2];
+//			Convert.setStrValue(data1[i], 0, array);
+//			hf.insertRecord(array);
+//		}
 		AttrType[] attrType = new AttrType[2];
-		attrType[0] = new AttrType(AttrType.attrString);
+		attrType[0] = new AttrType(AttrType.attrInteger);
 		attrType[1] = new AttrType(AttrType.attrString);
 		short[] attrSize = new short[2];
 		attrSize[0] = REC_LEN1;
@@ -92,7 +127,7 @@ public class MyTest extends TestDriver implements GlobalConst {
 		order[1] = new TupleOrder(TupleOrder.Descending);
 
 		Sort sort = new Sort(attrType, (short) 2, attrSize, null, 0, order[0],
-				data1[0].length()+2, SORTPGNUM);
+				REC_LEN1, SORTPGNUM);
 		sort.setHeapFile(hf);
 		sort.organizer();
 	}

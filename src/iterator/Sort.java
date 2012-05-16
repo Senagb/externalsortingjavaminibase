@@ -129,6 +129,17 @@ public class Sort extends Iterator implements GlobalConst {
 
 	// pass 0
 	public Vector<Heapfile> sortHeapfile() throws Exception {
+		/*
+		 * WE MAY NEED TO MODIFY THIS THROUGH CATCHING THIS EXCEPTION SORTING
+		 * WHAT WAS INSERTED SO FAR THEN CONTINUE !Exception in thread "main"
+		 * heap.HFDiskMgrException: Heapfile.java: get_file_entry() failed at
+		 * heap.Heapfile.get_file_entry(Heapfile.java:1015) at
+		 * heap.Heapfile.<init>(Heapfile.java:261) at
+		 * iterator.Sort.sortHeapfile(Sort.java:132) at
+		 * iterator.Sort.organizer(Sort.java:347) at
+		 * iterator.MyTest.<init>(MyTest.java:117) at
+		 * iterator.MyTest.main(MyTest.java:121)
+		 */
 		Vector<Heapfile> v = new Vector<Heapfile>();
 		Heapfile hf = new Heapfile("Sorted");
 		int t1 = gFile.getRecCnt();
@@ -140,10 +151,12 @@ public class Sort extends Iterator implements GlobalConst {
 		page.init(page.getCurPage(), page);
 		int counter = 0;
 		boolean entered = false;
+		int numOfPages = 0;
 		while (t != null) {
 			RID r = page.insertRecord(t.returnTupleByteArray());
 			entered = false;
 			if (r == null) {
+				numOfPages++;
 				page = sortPage(page);
 				RID dummyRID = page.firstRecord();
 				for (int i = 0; i < page.getSlotCnt(); i++) {
@@ -153,19 +166,25 @@ public class Sort extends Iterator implements GlobalConst {
 				}
 				System.out.println(hf.getRecCnt());
 				v.add(hf);
-				hf = new Heapfile("Sorted" + counter);
+				if (counter == 16)
+					counter++;
+				String name = "Sorted" + counter;
+				System.out.println(name);
+				hf = new Heapfile(name);
 				counter++;
 				page = new HFPage();
 				page.init(page.getCurPage(), page);
 				r = page.insertRecord(t.getTupleByteArray());
 				entered = true;
-				System.out.println("------------------------------------------");
+				System.out.println(numOfPages
+						+ " ------------------------------------------");
 			}
 			t = s.getNext(new RID());
 		}
 		if (!entered)
 			v.add(hf);
 		System.out.println("size " + v.size());
+		System.out.println("Number of Pages: " + numOfPages);
 		return v;
 	}
 
@@ -180,8 +199,8 @@ public class Sort extends Iterator implements GlobalConst {
 		tupleArray = mergeSortPage(tupleArray);
 		for (int i = 0; i < tupleArray.length; i++) {
 			p.insertRecord(tupleArray[i].getTupleByteArray());
-			System.out.println(Convert.getStrValue(0,
-					tupleArray[i].getTupleByteArray(), sortFldLen));
+			System.out.println(Convert.getIntValue(0,
+					tupleArray[i].getTupleByteArray()));
 		}
 		return p;
 	}
@@ -333,30 +352,33 @@ public class Sort extends Iterator implements GlobalConst {
 			SpaceNotAvailableException, IOException, Exception {
 		Vector<Heapfile> temp = sort_Runs(sortHeapfile());
 		Heapfile t = temp.elementAt(0);
+		System.out.println("ENDDDDDD");
 
 	}
 
 	public Vector<Heapfile> sort_Runs(Vector<Heapfile> files)
 			throws InvalidTupleSizeException, FieldNumberOutOfBoundException,
 			HFException, HFBufMgrException, HFDiskMgrException,
-			InvalidSlotNumberException, SpaceNotAvailableException, IOException, FileAlreadyDeletedException {
+			InvalidSlotNumberException, SpaceNotAvailableException,
+			IOException, FileAlreadyDeletedException {
 
 		Vector<Heapfile> temp = files;
-		Vector<Heapfile> temp1 ;
-		
+		Vector<Heapfile> temp1;
+
 		while (temp.size() != 1) {
 			temp1 = run(temp);
 			delete_Files(temp);
-			temp=temp1;
+			temp = temp1;
 		}
 		return temp;
 	}
-	
-	private void delete_Files(Vector<Heapfile> hf) throws InvalidSlotNumberException, FileAlreadyDeletedException, InvalidTupleSizeException, HFBufMgrException, HFDiskMgrException, IOException
-	{
-		for(int i=0;i<hf.size();i++)
-		{
-			hf.get(i).deleteFile();	
+
+	private void delete_Files(Vector<Heapfile> hf)
+			throws InvalidSlotNumberException, FileAlreadyDeletedException,
+			InvalidTupleSizeException, HFBufMgrException, HFDiskMgrException,
+			IOException {
+		for (int i = 0; i < hf.size(); i++) {
+			hf.get(i).deleteFile();
 		}
 	}
 
@@ -367,7 +389,7 @@ public class Sort extends Iterator implements GlobalConst {
 			SpaceNotAvailableException {
 
 		int size = 0;
-		int c=0;
+		int c = 0;
 		Vector<Heapfile> h_Files = files;
 		Vector<Heapfile> new_Files = new Vector<Heapfile>();
 		while (size < h_Files.size()) {
@@ -388,9 +410,9 @@ public class Sort extends Iterator implements GlobalConst {
 				c++;
 				try {
 					file.insertRecord(tuples.get(least).getTupleByteArray());
-					System.out.println("final :  "+ Convert.getStrValue(0,
-						       tuples.get(least).getTupleByteArray(),
-						       sortFldLen));
+					System.out.println("final :  "
+							+ Convert.getIntValue(0, tuples.get(least)
+									.getTupleByteArray()));
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -408,8 +430,7 @@ public class Sort extends Iterator implements GlobalConst {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if(c==212)
-				{
+				if (c == 212) {
 					System.out.println("");
 				}
 
@@ -436,7 +457,7 @@ public class Sort extends Iterator implements GlobalConst {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if (i == h_Files.size()-1)
+			if (i == h_Files.size() - 1)
 				return h_Scanners;
 		}
 		return h_Scanners;
@@ -446,9 +467,9 @@ public class Sort extends Iterator implements GlobalConst {
 			throws InvalidTupleSizeException, IOException {
 
 		Vector<Tuple> tuples = new Vector<Tuple>();
-		RID temp=new RID();
+		RID temp = new RID();
 		for (int i = 0; i < h_Scanners.size(); i++) {
-			
+
 			try {
 				tuples.add(h_Scanners.get(i).getNext(new RID()));
 			} catch (Exception e) {
@@ -465,12 +486,10 @@ public class Sort extends Iterator implements GlobalConst {
 
 		int target = 0;
 		boolean empty = true;
-		int j=0;
-		for(j=0;j<tuples.size();j++)
-		{
-			if (tuples.get(j) != null)
-			{
-				target=j;
+		int j = 0;
+		for (j = 0; j < tuples.size(); j++) {
+			if (tuples.get(j) != null) {
+				target = j;
 				break;
 			}
 		}
@@ -490,13 +509,11 @@ public class Sort extends Iterator implements GlobalConst {
 				}
 			} else {
 				for (int i = j; i < tuples.size(); i++) {
-					if(tuples.get(i)!=null){
-					String f=Convert.getStrValue(0,
-							tuples.get(i).getTupleByteArray(),
-							sortFldLen);
-					String s=Convert.getStrValue(0, tuples.get(target)
-							.getTupleByteArray(), sortFldLen);
-					System.out.println();
+					if (tuples.get(i) != null) {
+						String f = Convert.getStrValue(0, tuples.get(i)
+								.getTupleByteArray(), sortFldLen);
+						String s = Convert.getStrValue(0, tuples.get(target)
+								.getTupleByteArray(), sortFldLen);
 					}
 					if (tuples.get(i) != null
 							&& Convert.getStrValue(0,
