@@ -63,9 +63,15 @@ public class MyTest extends TestDriver implements GlobalConst {
 		super("sorttest");
 		SystemDefs sysdef = new SystemDefs(dbpath, 300, NUMBUF, "Clock");
 		hf = new Heapfile("scanTest");
+		int max=0;
+		for(int i=0;i<data1.length;i++)
+		{
+			if(data1[i].length()>max)
+				max=data1[i].length();
+		}
 		for (int i = 0; i < data1.length; i++) {
-			if (data1[i].length() != 8) {
-				while (data1[i].length() != 8) {
+			if (data1[i].length() < max) {
+				while (data1[i].length() != max) {
 					data1[i] += "p";
 				}
 			}
@@ -88,7 +94,7 @@ public class MyTest extends TestDriver implements GlobalConst {
 		Sort sort = new Sort(attrType, (short) 2, attrSize, null, 0, order[0],
 				data1[0].length()+2, SORTPGNUM);
 		sort.setHeapFile(hf);
-		sort.sortHeapfile();
+		sort.organizer();
 	}
 
 	public static void main(String[] args) throws Exception {
