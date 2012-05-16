@@ -143,7 +143,7 @@ public class MyTest extends TestDriver implements GlobalConst {
 		}
 		
 		//data1=generateRandomStrings(9500);
-		int [] num=generateRandomInt(9500);
+		int [] num=generateRandomInt(1500);
 		for (int i = 0; i < num.length; i++) {
 			byte[] array = new byte[4];
 			Convert.setIntValue(num[i], 0, array);	
