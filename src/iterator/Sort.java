@@ -20,7 +20,10 @@ import heap.Scan;
 import heap.SpaceNotAvailableException;
 import heap.Tuple;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.Vector;
 
 import diskmgr.Page;
@@ -206,6 +209,7 @@ public class Sort extends Iterator implements GlobalConst {
 			dummyrid = p.nextRecord(dummyrid);
 		}
 		tupleArray = mergeSortPage(tupleArray);
+		System.out.println("end");
 		for (int i = 0; i < tupleArray.length; i++) {
 			p.insertRecord(tupleArray[i].getTupleByteArray());
 			// System.out.println(Convert.getIntValue(0,
@@ -376,7 +380,7 @@ public class Sort extends Iterator implements GlobalConst {
 
 		while (temp.size() != 1) {
 			temp1 = run(temp);
-			//delete_Files(temp);
+			delete_Files(temp);
 			temp = temp1;
 		}
 		return temp;
@@ -399,63 +403,83 @@ public class Sort extends Iterator implements GlobalConst {
 
 		int size = 0;
 		int c = 0;
+		Tuple temp_T;
 		Vector<Heapfile> h_Files = files;
 		Vector<Heapfile> new_Files = new Vector<Heapfile>();
 		while (size < h_Files.size()) {
 			Heapfile file = null;
 			try {
-				file = new Heapfile("Sorted1" + counter);
+				file = new Heapfile("asser" + counter);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			Vector<Scan> h_Scanners = set_Scanners(h_Files, size);
+			int [] pageId= new int [h_Scanners.size()];
+			for(int i=0;i<pageId.length;i++)
+			{
+				Scan temp = h_Files.get(i).openScan();
+				RID zeft = new RID();
+				Tuple t = temp.getNext(zeft);
+				pageId[i]=zeft.pageNo.pid;
+				temp.closescan();
+			}
 			size += h_Scanners.size();
+			
+			
+			
+			Scan sc=files.get(1).openScan();
+			RID k=new RID();
+			Tuple t=sc.getNext(k);
+			t=sc.getNext(k);
+			int z=0;
+			FileWriter f=new FileWriter("fileTest2.txt");
+			BufferedWriter br=new BufferedWriter(f);
+		
+			while(t!=null)
+			{
+				br.write("rez2 "+z+"	"+Convert.getIntValue(0, t
+						.getTupleByteArray())+'\n');
+				System.out.println("final  "+c+"  :" 
+						+ Convert.getIntValue(0, t
+								.getTupleByteArray()));
+				t=sc.getNext(k);
+				z++;
+			}
+			br.close();
 			Vector<Tuple> tuples = set_Tuples(h_Scanners);
 			int least = max_min(tuples , order.tupleOrder == TupleOrder.Ascending , keyType == global.AttrType.attrInteger);
-
-			
-			int teto=0; 
 			
 			
-
 			while (least != -1) {
 				c++;
+				RID temp=new RID();
 				try {
 					file.insertRecord(tuples.get(least).getTupleByteArray());
 					System.out.println("final  "+c+"  :" 
 							+ Convert.getIntValue(0, tuples.get(least)
-									.getTupleByteArray()));
+									.getTupleByteArray())+"      "+least);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} // anhe
-					// byte
-					// arraye
-					// ele
-					// haktebha
-					// gowa
-					// el
-					// heapfile
+				} 
 				try {
 					
-					if(least==12)
+					temp_T=h_Scanners.get(least).getNext(temp);
+					if(temp.pageNo.pid==pageId[least]&&temp.slotNo==0)
 					{
-						teto++;
+						temp_T=null;
+						h_Scanners.get(least).closescan();
 					}
-					if(teto==125 && least==12)
-					{
-						tuples.setElementAt(null, least);
-					}else
-					{
-						tuples.setElementAt(h_Scanners.get(least).getNext(new RID()), least);
-					}
+						
+					
+						tuples.setElementAt(temp_T, least);
 					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (c == 1580) {
+				if (c == 245) {
 					System.out.println("");
 				}
 
@@ -465,6 +489,24 @@ public class Sort extends Iterator implements GlobalConst {
 			new_Files.add(file);
 			counter++;
 		}
+		Scan sc=new_Files.get(0).openScan();
+		Tuple t=sc.getNext(new RID());
+		int z=0;
+		FileWriter f=new FileWriter("fileTest3.txt");
+		BufferedWriter br=new BufferedWriter(f);
+	
+		while(t!=null)
+		{
+			br.write("rez2 "+z+"	"+Convert.getIntValue(0, t
+					.getTupleByteArray())+'\n');
+			System.out.println("final  "+c+"  :" 
+					+ Convert.getIntValue(0, t
+							.getTupleByteArray()));
+			t=sc.getNext(new RID());
+			z++;
+		}
+		br.close();
+
 		return new_Files;
 
 	}
@@ -474,16 +516,9 @@ public class Sort extends Iterator implements GlobalConst {
 
 		Vector<Scan> h_Scanners = new Vector<Scan>();
 		int temp=start;
-		for (int i = 0; i < temp + 49; i++) {
+		for (int i = temp; i < temp + 49; i++) {
 			try {
-				if(i==11)
-				{
-					h_Scanners.add(null);
 					h_Scanners.add(h_Files.get(i).openScan());					
-				}else
-				{
-					h_Scanners.add(h_Files.get(i).openScan());					
-				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -501,13 +536,7 @@ public class Sort extends Iterator implements GlobalConst {
 		for (int i = 0; i < h_Scanners.size(); i++) {
 
 			try {
-				if(h_Scanners.get(i)!=null)
-				{
 					tuples.add(h_Scanners.get(i).getNext(new RID()));					
-				}else
-				{
-					tuples.add(null);
-				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -532,6 +561,16 @@ public class Sort extends Iterator implements GlobalConst {
 		}
 		if (isAscending) {
 			if (isInteger) {
+				try{
+				int x1=Convert.getIntValue(0, tuples.get(1)
+						.getTupleByteArray());
+				int x2=Convert.getIntValue(0, tuples.get(target)
+						.getTupleByteArray());
+				System.out.println();
+				}catch(Exception e)
+				{
+					
+				}
 				for (int i = j; i < tuples.size(); i++) {
 					if (tuples.get(i) != null
 							&& Convert.getIntValue(0, tuples.get(i)
