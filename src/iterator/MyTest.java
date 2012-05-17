@@ -103,7 +103,7 @@ public class MyTest extends TestDriver implements GlobalConst {
 		System.out
 				.println("\n" + "Running " + testName() + " tests...." + "\n");
 
-		SystemDefs sysdef = new SystemDefs(dbpath, 100000, 50, "Clock");
+		SystemDefs sysdef = new SystemDefs(dbpath, 1000000, 50, "Clock");
 
 		// Kill anything that might be hanging around
 		String newdbpath;
