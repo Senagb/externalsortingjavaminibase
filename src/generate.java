@@ -23,7 +23,7 @@ public class generate {
 	
 	public static void main(String [] args) throws IOException
 	{
-		generateRandomInt(3000);
+		generateRandomInt(20000);
 	}
 	
 	
