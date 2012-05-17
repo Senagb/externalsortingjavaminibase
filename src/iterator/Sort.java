@@ -168,7 +168,6 @@ public class Sort extends Iterator implements GlobalConst {
 					hf.insertRecord(temp.getTupleByteArray());
 					dummyRID = page.nextRecord(dummyRID);
 				}
-				SystemDefs.JavabaseBM.unpinPage(page.getCurPage(), true);
 				// System.out.println(hf.getRecCnt());
 				v.add(hf);
 				System.out.println(hf.getRecCnt());
@@ -181,7 +180,7 @@ public class Sort extends Iterator implements GlobalConst {
 				r = page.insertRecord(t.getTupleByteArray());
 				entered = true;
 				 System.out.println(numOfPages
-				 + " ------------------------------------------");
+				 + " ------------------------------------------ "+SystemDefs.JavabaseBM.getNumUnpinnedBuffers());
 			}
 		//	SystemDefs.JavabaseBM.unpinPage(page.getCurPage(), true);
 			t = s.getNext(new RID());
@@ -417,14 +416,22 @@ public class Sort extends Iterator implements GlobalConst {
 				e.printStackTrace();
 			}
 			Vector<Scan> h_Scanners = set_Scanners(h_Files, size);
+			System.out.println(h_Scanners.size());
 			int [] pageId= new int [h_Scanners.size()];
 			for(int i=0;i<pageId.length;i++)
 			{
-				Scan temp = h_Files.get(i).openScan();
+				Scan temp;
+				try {
+					temp = h_Files.get(i).openScan();
 				RID zeft = new RID();
 				Tuple t = temp.getNext(zeft);
 				pageId[i]=zeft.pageNo.pid;
 				temp.closescan();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
 			}
 			size += h_Scanners.size();
 			
@@ -518,9 +525,10 @@ public class Sort extends Iterator implements GlobalConst {
 
 		Vector<Scan> h_Scanners = new Vector<Scan>();
 		int temp=start;
-		for (int i = temp; i < temp + 49; i++) {
+		for (int i = temp; SystemDefs.JavabaseBM.getNumUnpinnedBuffers()>2; i++) {
 			try {
-					h_Scanners.add(h_Files.get(i).openScan());					
+					h_Scanners.add(h_Files.get(i).openScan());	
+					System.out.println(SystemDefs.JavabaseBM.getNumUnpinnedBuffers());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
