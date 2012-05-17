@@ -5,6 +5,7 @@ import global.Convert;
 import global.GlobalConst;
 import global.PageId;
 import global.RID;
+import global.SystemDefs;
 import global.TupleOrder;
 import heap.FieldNumberOutOfBoundException;
 import heap.FileAlreadyDeletedException;
@@ -167,6 +168,7 @@ public class Sort extends Iterator implements GlobalConst {
 					hf.insertRecord(temp.getTupleByteArray());
 					dummyRID = page.nextRecord(dummyRID);
 				}
+				SystemDefs.JavabaseBM.unpinPage(page.getCurPage(), true);
 				// System.out.println(hf.getRecCnt());
 				v.add(hf);
 				System.out.println(hf.getRecCnt());
@@ -178,9 +180,10 @@ public class Sort extends Iterator implements GlobalConst {
 				page.init(page.getCurPage(), page);
 				r = page.insertRecord(t.getTupleByteArray());
 				entered = true;
-				// System.out.println(numOfPages
-				// + " ------------------------------------------");
+				 System.out.println(numOfPages
+				 + " ------------------------------------------");
 			}
+		//	SystemDefs.JavabaseBM.unpinPage(page.getCurPage(), true);
 			t = s.getNext(new RID());
 		}
 		if (!entered) {
@@ -209,7 +212,6 @@ public class Sort extends Iterator implements GlobalConst {
 			dummyrid = p.nextRecord(dummyrid);
 		}
 		tupleArray = mergeSortPage(tupleArray);
-		System.out.println("end");
 		for (int i = 0; i < tupleArray.length; i++) {
 			p.insertRecord(tupleArray[i].getTupleByteArray());
 			// System.out.println(Convert.getIntValue(0,
