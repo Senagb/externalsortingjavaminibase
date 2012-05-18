@@ -116,6 +116,7 @@ public class externalSort extends Sort {
 			System.out.println(i + " / " + v.get(i).getRecCnt());
 		System.out.println("size " + v.size());
 		System.out.println("Number of Pages: " + numOfPages);
+		s.closescan();
 		return v;
 	}
 
@@ -137,7 +138,7 @@ public class externalSort extends Sort {
 																// page
 
 		}
-		s.closescan();
+	
 		return p;
 	}
 
