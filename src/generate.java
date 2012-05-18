@@ -14,7 +14,7 @@ public class generate {
 		Random rd = new Random();
 		for(int i=0;i<num;i++)
 		{
-			array[i]=rd.nextInt(1000);
+			array[i]=rd.nextInt(1000000);
 			br.write(array[i]+" ");
 		}
 		br.close();

@@ -174,9 +174,9 @@ public class MyTest extends TestDriver implements GlobalConst {
 		order[0] = new TupleOrder(TupleOrder.Ascending);
 		order[1] = new TupleOrder(TupleOrder.Descending);
 
-		Sort sort = new Sort(attrType, (short) 2, attrSize, null, 0, order[0],
-				REC_LEN1, SORTPGNUM);
-		sort.setHeapFile(hf);
+		externalSort sort = new externalSort(attrType, (short) 2, attrSize, null, 0, order[0],
+				REC_LEN1, SORTPGNUM,hf);
+	
 		sort.organizer();
 
 	
